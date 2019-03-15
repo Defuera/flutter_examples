@@ -17,6 +17,8 @@ dev_dependencies:
     sdk: flutter
   flutter_bloc: ^0.3.0
   transparent_image: 1.0.0
+  intl: 0.15.7
+
 
 flutter:
   uses-material-design: true
