@@ -1,37 +1,73 @@
+import 'package:bloc/bloc.dart';
+import 'package:examples/listexample/ListItem.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-const _imageUrl =
-    "https://nerdist.com/wp-content/uploads/2017/12/bulbasaur-charmander-squirtle-pokemon.jpg";
+const _imageUrl = "https://nerdist.com/wp-content/uploads/2017/12/bulbasaur-charmander-squirtle-pokemon.jpg";
 
-class ListExamplePage extends StatelessWidget {
+class ListExamplePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("ListExamplePage"),
-      ),
-      body: ListView.builder(
-        itemCount: 3,
-        itemBuilder: (context, index) => buildListWidget(context, index),
-      ),
-    );
-  }
-
-  Widget buildListWidget(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        return HeaderWidget();
-      case 1:
-        return TitleWidget();
-      case 2:
-        return ContentsWidget();
-    }
-
-    throw Exception("Illegal state");
+  State<StatefulWidget> createState() {
+    return _ListExampleState();
   }
 }
 
+class _ListExampleState extends State<ListExamplePage> {
+  final bloc = ListExampleBloc();
+
+  @override
+  Widget build(BuildContext context) {
+    bloc.onStart();
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("ListExamplePage"),
+        ),
+        body: BlocBuilder<Event, ViewModel>(
+          bloc: bloc,
+          builder: (
+            BuildContext context,
+            ViewModel viewModel,
+          ) {
+            if (viewModel.loading) {
+              return CircularProgressIndicator();
+            } else if (viewModel.data != null) {
+              return ListView.builder(
+                itemBuilder: (context, index) => buildListWidget(context, index),
+                itemCount: calculateAmount(viewModel.data),
+              ); //ListItemWidget(viewModel.data);
+            } else {
+              throw Exception("unknown state");
+            }
+          },
+        ));
+  }
+
+  Widget buildListWidget(BuildContext context, int index) {
+//    switch (index) {
+//      case 0:
+//        return HeaderWidget();
+//      case 1:
+//        return TitleWidget();
+//      case 2:
+//        return ContentsWidget();
+//    }
+
+    throw Exception("Illegal state");
+  }
+
+  //every five items we insert title
+  int calculateAmount(List<ListItem> data) => data.length + (data.length / 5 as int);
+}
+
+abstract class Event {}
+
+abstract class ViewModel {
+  bool loading;
+  List<ListItem> data;
+}
+
+class Loading extends ViewModel {}
 
 class HeaderWidget extends StatelessWidget {
   @override
@@ -40,7 +76,8 @@ class HeaderWidget extends StatelessWidget {
       color: Colors.yellow,
       child: AspectRatio(
         aspectRatio: 2.2,
-        child: FadeInImage.memoryNetwork( //todo not working
+        child: FadeInImage.memoryNetwork(
+          //todo not working
           placeholder: kTransparentImage,
           image: _imageUrl,
         ),
@@ -75,3 +112,17 @@ class ContentsWidget extends StatelessWidget {
     );
   }
 }
+
+class ListExampleBloc extends Bloc<Event, ViewModel> {
+  @override
+  get initialState => Loading();
+
+  @override
+  Stream<ViewModel> mapEventToState(state, event) {
+    return null;
+  }
+
+  void onStart() {}
+}
+
+class MockGenerator {}
